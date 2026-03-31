@@ -100,17 +100,19 @@
                     <div>
                         <label class="block text-slate-400 mb-1 font-semibold text-xs"><i class="fa-solid fa-map-location-dot"></i> Lokasi Generik (AI akan melengkapi)</label>
                         <select id="locSelect" class="w-full bg-slate-900 text-slate-200 border border-slate-600 rounded p-2 outline-none focus:border-blue-500 cursor-pointer">
-                            <option value="Bebas, biarkan AI menyesuaikan dengan Era">🎲 Acak Otomatis</option>
-                            <option value="Kamar Tidur Berantakan / Kos-kosan">Kamar / Kos-kosan</option>
-                            <option value="Jalanan Kota / Trotoar / Zebra Cross">Jalanan Kota / Aspal</option>
-                            <option value="Di Atas Panggung Konser">Panggung Konser</option>
-                            <option value="Backstage Konser / Ruang Tunggu Alat">Backstage Konser</option>
-                            <option value="Kamar Mandi / Restroom Kaca Besar">Toilet Kaca (Mirror Selfie)</option>
-                            <option value="Warteg / Tempat Makan Pinggir Jalan">Warteg / Street Food</option>
-                            <option value="Dalam Mobil (Jok Depan/Belakang)">Dalam Mobil</option>
-                            <option value="Minimarket / Lorong Supermarket">Minimarket / Indomaret</option>
-                            <option value="Pantai / Pinggir Laut">Pantai / Alam Terbuka</option>
-                        </select>
+                        <option value="Bebas, biarkan AI berimajinasi menciptakan lokasi (micro-location) yang sangat unik, detail, dan tidak terduga sesuai Era">🎲 Acak AI (Paling Kreatif)</option>
+                        <option value="Kamar Tidur / Kos-kosan / Ruang Tamu yang berantakan atau estetik">Kamar / Ruang Dalam</option>
+                        <option value="Jalanan Kota / Gang Sempit / Trotoar / Zebra Cross">Jalanan / Gang Kota</option>
+                        <option value="Warteg / Angkringan / Kios Street Food pinggir jalan">Warteg / Street Food</option>
+                        <option value="Kedai Kopi Lokal / Warkop / Cafe Estetik">Kedai Kopi / Cafe</option>
+                        <option value="Transportasi Umum (Dalam KRL, Angkot, atau Halte Bus)">Transportasi Umum</option>
+                        <option value="Pusat Perbelanjaan / Mall / Lorong Minimarket">Mall / Minimarket</option>
+                        <option value="Panggung Konser / Festival Musik">Panggung Konser</option>
+                        <option value="Backstage Konser / Gudang Alat Musik">Backstage / Gudang</option>
+                        <option value="Dalam Kendaraan (Jok Depan/Belakang Mobil atau Motor)">Dalam Kendaraan</option>
+                        <option value="Pantai / Taman / Alam Terbuka">Alam / Ruang Terbuka</option>
+                        <option value="Kamar Mandi / Restroom Kaca Besar">Toilet (Mirror Selfie)</option>
+                    </select>
                     </div>
                 </div>
 
@@ -491,21 +493,22 @@
 
 KRITERIA WAJIB:
 - Era/Zaman: ${era}
-- Lokasi: ${loc}
+- Lokasi Dasar: ${loc}
 - Hari Raya/Event: ${holiday}
 - Daftar Subjek: ${charDesc}
-- Gaya Kamera: ${camera}
+- Gaya Kamera: ${camera} (Gunakan informasi ini untuk mengisi TYPE dan ANGLE)
 - Komposisi Frame: ${comp}
 - Filter/Aesthetic: ${vibe}
 - Waktu & Cuaca: ${time}, ${weather}
 - Kegiatan/Pose: ${custom ? custom : "Buat interaksi natural khas orang Indonesia sesuai era."}
 
-INSTRUKSI KHUSUS RAMBUT, PAKAIAN & AKSESORIS (SANGAT PENTING):
-Jangan gunakan pakaian atau gaya rambut yang itu-itu saja (hindari stereotip generik yang membosankan). Kamu WAJIB memberikan variasi gaya yang SANGAT BERAGAM, UNIK, dan DETAIL.
-1. Sebutkan warna pakaian, jenis bahan (denim, corduroy, katun, rajut, dll), corak (garis, floral, grafis band), dan lapisannya (layering).
-2. Gali fashion niche, sub-kultur, atau gaya jalanan yang spesifik pada ERA ${era}.
-3. Tentukan aksesoris yang detail (misal: jepit rambut warna-warni, kacamata frame tebal, kalung rantai, tas selempang kanvas, jam tangan karet, dll).
-4. Buat agar setiap karakter di dalam foto memiliki *personal style* yang saling kontras satu sama lain.
+INSTRUKSI KHUSUS LOKASI & LINGKUNGAN (SANGAT PENTING):
+Berdasarkan "Lokasi Dasar" di atas, tugasmu adalah menciptakan *Micro-Location* yang SANGAT SPESIFIK, HIDUP, dan TIDAK MEMBOSANKAN. 
+Jangan hanya menggunakan latar belakang yang kosong. 
+Contoh: Jika lokasi "Kedai Kopi", detailkan alat seduh manual V60, uap air, atau cangkir di meja. Jika "Jalanan", sebutkan tiang listrik berkarat, genangan air, atau tenda makanan jalanan bergaya Korea di latar belakang. Detailkan properti di sekitarnya pada bagian ENVIRONMENT.
+
+INSTRUKSI KHUSUS RAMBUT, PAKAIAN & AKSESORIS:
+Hindari stereotip generik. Berikan variasi gaya yang SANGAT BERAGAM dan DETAIL. Sebutkan warna pakaian, jenis bahan, corak, dan gaya rambut yang akurat pada ERA ${era} untuk masing-masing orang.
 
 KEMBALIKAN HANYA FORMAT JSON BERIKUT (TANPA TEKS LAIN/MARKDOWN):
 {
@@ -513,8 +516,8 @@ KEMBALIKAN HANYA FORMAT JSON BERIKUT (TANPA TEKS LAIN/MARKDOWN):
     "META": { "STYLERNAME": "Nama style", "ASPECTRATIO": "9:16 atau 3:4 atau 1:1" },
     "CAMERA": { "MODEL": "...", "FOCALLNGTH": "...", "ANGLE": "...", "TYPE": "AMATEUR SNAPSHOT" },
     "SUBJECT": { "PRIMARY": "Deskripsi subjek", "GROUP_DYNAMICS_POSE": "Jelaskan pose dan interaksi (Inggris)", "GAZE": "Arah mata" },
-    "WARDROBE": { "THEME": "...", "OUTFITS": "Deskripsi baju sangat detail per orang (bahan, warna, corak)", "HAIR_AND_ACCESSORIES": "Rambut spesifik & Aksesoris unik per orang", "APPEARANCE": "..." },
-    "ENVIRONMENT": { "LOCATION": "...", "TIME_OF_DAY": "...", "WEATHER_CONDITION": "...", "DETAILS": "...", "COMPOSITION_VIBE": "..." },
+    "WARDROBE": { "THEME": "...", "OUTFITS": "Baju spesifik per orang (bahan, warna)", "HAIR_AND_ACCESSORIES": "Rambut spesifik & Aksesoris per orang", "APPEARANCE": "..." },
+    "ENVIRONMENT": { "LOCATION": "Deskripsikan Micro-Location spesifik", "TIME_OF_DAY": "...", "WEATHER_CONDITION": "...", "DETAILS": "Properti spesifik di sekitar subjek yang membuat suasana hidup", "COMPOSITION_VIBE": "..." },
     "LIGHTING": { "SOURCE": "...", "DIRECTION": "...", "QUALITY": "..." },
     "RENDERING_EFFECTS": { "ENGINE": "PHOTOREALISTIC RAW UPLOAD, LOCAL INDONESIAN VIBE", "AESTHETIC_FLAWS": "...", "POSTPROCESSING": "UNEDITED CAMERA ROLL" },
     "NEGATIVE_PROMPT": "studio lighting, professional, CGI, dll."
