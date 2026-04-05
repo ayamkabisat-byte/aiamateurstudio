@@ -693,10 +693,11 @@ KRITERIA WAJIB:
 - Waktu & Cuaca: ${time}, ${weather}
 - Kegiatan/Pose: ${custom ? custom : "Interaksi candid/pose natural sesuai skenario."}
 
-INSTRUKSI KHUSUS LOKASI, MUSIM & PAKAIAN (SANGAT KRUSIAL):
+INSTRUKSI KHUSUS LOKASI, MUSIM, PAKAIAN & KAMERA (SANGAT KRUSIAL):
 1. LOKASI GLOBAL: Jika Region bukan "Acak", ciptakan *Micro-Location* ikonik yang SANGAT SPESIFIK dan HIDUP berdasarkan Region tersebut. 
-2. LOGIKA MUSIM & CUACA (CRITICAL): Sesuaikan pakaian (WARDROBE) dengan lokasi, cuaca, dan era secara LOGIS. DILARANG KERAS memakaikan winter coat/mantel tebal di pantai tropis atau daerah panas. DILARANG KERAS memakaikan kaos oblong tipis/baju renang di pegunungan bersalju atau cuaca winter.
+2. LOGIKA MUSIM & CUACA (CRITICAL): Sesuaikan pakaian (WARDROBE) dengan lokasi, cuaca, dan era secara LOGIS. DILARANG KERAS memakaikan winter coat/mantel tebal di pantai tropis atau daerah panas.
 3. FASHION & AKSESORIS: Gali sub-kultur fashion era tersebut. Sebutkan warna, bahan, layer, dan aksesoris spesifik untuk setiap karakter.
+4. ATURAN ANTI-KAMERA BOCOR: Jika gaya kamera adalah "Selfie" (bukan Mirror Selfie) atau "Candid", JANGAN mendeskripsikan subjek sedang memegang HP atau kamera di bagian Pose atau Wardrobe. Biarkan tangan mereka bebas berekspresi.
 
 KEMBALIKAN HANYA FORMAT JSON BERIKUT (TANPA TEKS LAIN/MARKDOWN):
 {
@@ -742,17 +743,31 @@ KEMBALIKAN HANYA FORMAT JSON BERIKUT (TANPA TEKS LAIN/MARKDOWN):
                 const jsonString = data.candidates[0].content.parts[0].text;
                 let parsedJSON = JSON.parse(jsonString);
 
+                let camUpper = camera.toUpperCase();
+                let currentNeg = parsedJSON.PHOTO_PROMPT.NEGATIVE_PROMPT || "studio lighting, professional, CGI";
+
+                // --- INVISIBLE CAMERA ENFORCEMENT (ANTI-BOCOR JAVASCRIPT LAYER) ---
+                if ((camUpper.includes("SELFIE") && !camUpper.includes("MIRROR")) || camUpper.includes("POV")) {
+                    currentNeg += ", showing phone, holding phone, holding camera, mobile phone in frame, device in frame, mirror reflection, selfie arm";
+                    if (!parsedJSON.PHOTO_PROMPT.CAMERA) parsedJSON.PHOTO_PROMPT.CAMERA = {};
+                    parsedJSON.PHOTO_PROMPT.CAMERA.STRICT_RULE = "THE CAMERA OR PHONE MUST BE COMPLETELY INVISIBLE IN THE SCENE. DO NOT RENDER DEVICES IN HANDS.";
+                } else if (camUpper.includes("CANDID") || camUpper.includes("ACCIDENTAL") || camUpper.includes("CCTV")) {
+                    currentNeg += ", showing phone, holding camera, photographer, taking picture, mirror reflection";
+                }
+
                 // --- INJECT STRICT RULES & MATCH POSE AFTER AI GENERATION ---
                 if (strictMode === "STRICT") {
-                    let currentNeg = parsedJSON.PHOTO_PROMPT.NEGATIVE_PROMPT || "";
                     parsedJSON.PHOTO_PROMPT.AI_ENFORCEMENT = {
                         "STRICT_MODE": "ENABLED",
                         "REFERENCE_IMAGE_STRENGTH": parseFloat(strictWeight),
                         "INSTRUCTION": "Enable strict facial consistency mode. Prioritize the facial features from the provided reference image for all subsequent generations. Maintain the subject's identity accurately while only adapting the pose, lighting, dan background.",
-                        "NEGATIVE_PROMPT": currentNeg + ", deformed, deviations from prompt, generic faces, morphed bodies, fused people, changing facial features, different person"
+                        "NEGATIVE_PROMPT_ADDITION": "deformed, deviations from prompt, generic faces, morphed bodies, fused people, changing facial features, different person"
                     };
-                    delete parsedJSON.PHOTO_PROMPT.NEGATIVE_PROMPT; 
+                    currentNeg += ", deformed, deviations from prompt, generic faces, morphed bodies, fused people, changing facial features, different person";
                 }
+                
+                // Set the final bulletproof negative prompt
+                parsedJSON.PHOTO_PROMPT.NEGATIVE_PROMPT = currentNeg;
 
                 if (camera === "MATCH_POSE_EXACTLY") {
                     parsedJSON.PHOTO_PROMPT.IMAGE_REFERENCE_INSTRUCTION = "ControlNet Pose / Depth enforcement: The AI MUST strictly replicate the exact anatomical posture, camera angle, perspective, and item placements as seen in the reference image the user provides.";
