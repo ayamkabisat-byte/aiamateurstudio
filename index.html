@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global AI Prompt Director V4.0</title>
+    <title>Global AI Prompt Director V4.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -24,8 +24,8 @@
 
     <div id="mainContent" class="w-full max-w-7xl transition-all duration-500">
         <div class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2"><i class="fa-solid fa-earth-americas text-blue-500 mr-2"></i> Global AI Shot V4.0</h1>
-            <p class="text-slate-400">Lokasi Seluruh Dunia + Logika Cuaca Cerdas + Smart Lock System.</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2"><i class="fa-solid fa-earth-americas text-blue-500 mr-2"></i> Global AI Shot V4.1</h1>
+            <p class="text-slate-400">Lokasi Seluruh Dunia + Advanced Locks + API Safety Cooldown.</p>
             
             <div class="mt-4 flex justify-center items-center gap-2">
                 <div class="relative w-full max-w-md">
@@ -229,7 +229,7 @@
 
         <div id="advancedPanel" class="hidden w-full max-w-7xl mx-auto bg-slate-800/80 p-5 rounded-xl border border-blue-900/50 shadow-inner text-sm mb-8">
             <h3 class="text-blue-400 font-bold border-b border-blue-900/50 pb-2 mb-4"><i class="fa-solid fa-users-viewfinder"></i> Kustomisasi Karakter Independen</h3>
-            <div id="characterRows" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div id="characterRows" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 </div>
         </div>
 
@@ -468,6 +468,7 @@
             if(document.getElementById('advancedToggle').checked) renderAdvancedRows();
         }
 
+        // FUNGSI RENDER ADVANCED ROWS (DENGAN SISTEM KUNCI/LOCK PER ORANG)
         function renderAdvancedRows() {
             const numVal = document.getElementById('numSelect').value;
             const container = document.getElementById('characterRows');
@@ -476,28 +477,72 @@
             let num = isNaN(parseInt(numVal)) ? Math.floor(Math.random() * 4) + 1 : parseInt(numVal);
             if (document.getElementById('genderSelect').value.includes("Couple")) num = 2;
 
+            // Simpan status lama (agar kalau tambah jumlah orang, lock yang lama tidak hilang)
+            let savedState = [];
+            for(let i=0; i<container.children.length; i++) {
+                let state = {};
+                ['name', 'gender', 'age', 'demo'].forEach(f => {
+                    const el = document.getElementById(`adv_${f}_${i}`);
+                    if (el) state[f] = { value: el.value, locked: el.dataset.locked === "true" };
+                });
+                savedState.push(state);
+            }
+
             container.innerHTML = "";
             for(let i=0; i<num; i++) {
+                let nameVal = "", nameLocked = false;
+                let genVal = "Acak", genLocked = false;
+                let ageVal = "Acak", ageLocked = false;
+                let demoVal = "Acak", demoLocked = false;
+
+                if (savedState[i]) {
+                    if (savedState[i].name) { nameVal = savedState[i].name.value; nameLocked = savedState[i].name.locked; }
+                    if (savedState[i].gender) { genVal = savedState[i].gender.value; genLocked = savedState[i].gender.locked; }
+                    if (savedState[i].age) { ageVal = savedState[i].age.value; ageLocked = savedState[i].age.locked; }
+                    if (savedState[i].demo) { demoVal = savedState[i].demo.value; demoLocked = savedState[i].demo.locked; }
+                }
+
                 let row = `
                 <div class="bg-slate-900/80 p-3 rounded border border-slate-600 shadow-md flex flex-col gap-2">
                     <div class="font-bold text-blue-400 border-b border-slate-700 pb-1">Orang ${i+1}</div>
-                    <input type="text" id="adv_name_${i}" placeholder="Nama/Mirip Artis" class="w-full bg-slate-800 text-green-300 border border-slate-600 rounded p-1.5 text-xs outline-none focus:border-blue-500">
-                    <select id="adv_gender_${i}" class="w-full bg-slate-800 text-slate-200 border border-slate-600 rounded p-1.5 text-xs outline-none focus:border-blue-500">
-                        <option value="Acak">🎲 Acak Gender</option><option value="Pria">Pria</option><option value="Wanita">Wanita</option>
-                    </select>
-                    <select id="adv_age_${i}" class="w-full bg-slate-800 text-slate-200 border border-slate-600 rounded p-1.5 text-xs outline-none focus:border-blue-500">
-                        <option value="Acak">🎲 Acak Usia</option><option value="Remaja">Remaja</option><option value="Dewasa Muda">Dewasa Muda</option><option value="Dewasa">Dewasa</option>
-                    </select>
-                    <select id="adv_demo_${i}" class="w-full bg-slate-800 text-slate-200 border border-slate-600 rounded p-1.5 text-xs outline-none focus:border-blue-500">
-                        <option value="Acak">🎲 Acak Etnis</option>
-                        ${demographics.map(d => `<option value="${d}">${d}</option>`).join('')}
-                    </select>
+                    
+                    <div class="flex gap-2 items-center">
+                        <input type="text" id="adv_name_${i}" data-locked="${nameLocked}" value="${nameVal}" placeholder="Nama Artis (Opsional)" class="flex-1 min-w-0 bg-slate-800 text-green-300 border ${nameLocked ? 'border-red-500 pointer-events-none opacity-50' : 'border-slate-600'} rounded p-1.5 text-xs outline-none focus:border-blue-500">
+                        <i class="fa-solid ${nameLocked ? 'fa-lock text-red-500' : 'fa-lock-open text-slate-500'} cursor-pointer hover:text-white" onclick="toggleLock('adv_name_${i}', this)"></i>
+                    </div>
+
+                    <div class="flex gap-2 items-center">
+                        <select id="adv_gender_${i}" data-locked="${genLocked}" class="flex-1 min-w-0 bg-slate-800 text-slate-200 border ${genLocked ? 'border-red-500 pointer-events-none opacity-50' : 'border-slate-600'} rounded p-1.5 text-xs outline-none focus:border-blue-500">
+                            <option value="Acak" ${genVal==="Acak"?"selected":""}>🎲 Acak Gender</option>
+                            <option value="Pria" ${genVal==="Pria"?"selected":""}>Pria</option>
+                            <option value="Wanita" ${genVal==="Wanita"?"selected":""}>Wanita</option>
+                        </select>
+                        <i class="fa-solid ${genLocked ? 'fa-lock text-red-500' : 'fa-lock-open text-slate-500'} cursor-pointer hover:text-white" onclick="toggleLock('adv_gender_${i}', this)"></i>
+                    </div>
+                    
+                    <div class="flex gap-2 items-center">
+                        <select id="adv_age_${i}" data-locked="${ageLocked}" class="flex-1 min-w-0 bg-slate-800 text-slate-200 border ${ageLocked ? 'border-red-500 pointer-events-none opacity-50' : 'border-slate-600'} rounded p-1.5 text-xs outline-none focus:border-blue-500">
+                            <option value="Acak" ${ageVal==="Acak"?"selected":""}>🎲 Acak Usia</option>
+                            <option value="Remaja" ${ageVal==="Remaja"?"selected":""}>Remaja</option>
+                            <option value="Dewasa Muda" ${ageVal==="Dewasa Muda"?"selected":""}>Dewasa Muda</option>
+                            <option value="Dewasa" ${ageVal==="Dewasa"?"selected":""}>Dewasa</option>
+                        </select>
+                        <i class="fa-solid ${ageLocked ? 'fa-lock text-red-500' : 'fa-lock-open text-slate-500'} cursor-pointer hover:text-white" onclick="toggleLock('adv_age_${i}', this)"></i>
+                    </div>
+
+                    <div class="flex gap-2 items-center">
+                        <select id="adv_demo_${i}" data-locked="${demoLocked}" class="flex-1 min-w-0 bg-slate-800 text-slate-200 border ${demoLocked ? 'border-red-500 pointer-events-none opacity-50' : 'border-slate-600'} rounded p-1.5 text-xs outline-none focus:border-blue-500">
+                            <option value="Acak" ${demoVal==="Acak"?"selected":""}>🎲 Acak Etnis</option>
+                            ${demographics.map(d => `<option value="${d}" ${d===demoVal?"selected":""}>${d}</option>`).join('')}
+                        </select>
+                        <i class="fa-solid ${demoLocked ? 'fa-lock text-red-500' : 'fa-lock-open text-slate-500'} cursor-pointer hover:text-white" onclick="toggleLock('adv_demo_${i}', this)"></i>
+                    </div>
                 </div>`;
                 container.innerHTML += row;
             }
         }
 
-        // --- RESET AND GENERATE LOGIC ---
+        // --- RESET LOGIC ---
         function resetAndGenerate() {
             // Hanya reset input yang TIDAK DI-LOCK
             const dropdownIds = ['numSelect', 'ageSelect', 'eraSelect', 'locSelect', 'cameraSelect', 'genderSelect', 'timeSelect', 'weatherSelect', 'aestheticSelect', 'bodyTypeSelect', 'strictSelect', 'compSelect'];
@@ -521,12 +566,33 @@
             if (customScenarioInput && customScenarioInput.dataset.locked !== "true") customScenarioInput.value = "";
             
             toggleStrictLevel();
+            
+            const advToggle = document.getElementById('advancedToggle');
+            if(advToggle && advToggle.checked) {
+                const container = document.getElementById('characterRows');
+                if (container) {
+                    const rows = container.children.length;
+                    for(let i=0; i<rows; i++) {
+                        const nameEl = document.getElementById(`adv_name_${i}`);
+                        if (nameEl && nameEl.dataset.locked !== "true") nameEl.value = "";
+                        
+                        const genEl = document.getElementById(`adv_gender_${i}`);
+                        if (genEl && genEl.dataset.locked !== "true") genEl.value = "Acak";
+                        
+                        const ageEl = document.getElementById(`adv_age_${i}`);
+                        if (ageEl && ageEl.dataset.locked !== "true") ageEl.value = "Acak";
+                        
+                        const demoEl = document.getElementById(`adv_demo_${i}`);
+                        if (demoEl && demoEl.dataset.locked !== "true") demoEl.value = "Acak";
+                    }
+                }
+            }
+
             renderLocationList();
             renderCameraList();
             renderAestheticList();
             
-            // Perhatian: Sengaja TIDAK memanggil generateAI() di sini agar tidak memakan limit API saat user baru mereset form.
-            alert("Form telah diacak (kriteria yang dikunci tetap aman). Silakan klik 'GENERATE PROMPT' untuk mengeksekusi AI.");
+            alert("Form telah diacak (kriteria yang dikunci tetap aman). Silakan klik tombol biru 'GENERATE PROMPT' untuk eksekusi.");
         }
 
         function getCharactersPrompt() {
@@ -592,10 +658,13 @@
             }
 
             const btn = document.getElementById('generateBtn');
-            const originalBtnHtml = btn.innerHTML;
+            const originalBtnHtml = '<i class="fa-solid fa-robot text-2xl"></i> GENERATE PROMPT';
+            
+            // UI MASUK MODE LOADING
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-2xl"></i> MENGHUBUNGI SATELIT...';
             btn.disabled = true;
-            btn.classList.add('opacity-70', 'cursor-not-allowed');
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.classList.remove('hover:scale-105', 'hover:bg-blue-500');
 
             document.getElementById('jsonOutputPhoto').textContent = "// Meminta ke Gemini API...\n// Harap tunggu beberapa detik.";
             document.getElementById('jsonOutputVideo').textContent = "// Meminta ke Gemini API...\n// Harap tunggu beberapa detik.";
@@ -614,7 +683,7 @@
 
             const metaPrompt = `Kamu adalah AI ahli pembuat prompt gambar photorealistic (text-to-image) amatir bergaya jepretan smartphone candid.
 
-KRITERIA WAJIB (IKUTI SECARA KETAT JIKA TIDAK DITULIS "ACAK"):
+KRITERIA WAJIB:
 - Era/Zaman: ${era}
 - Lokasi Dasar / Region: ${loc}
 - Daftar Subjek: ${charDesc}
@@ -625,9 +694,9 @@ KRITERIA WAJIB (IKUTI SECARA KETAT JIKA TIDAK DITULIS "ACAK"):
 - Kegiatan/Pose: ${custom ? custom : "Interaksi candid/pose natural sesuai skenario."}
 
 INSTRUKSI KHUSUS LOKASI, MUSIM & PAKAIAN (SANGAT KRUSIAL):
-1. LOKASI GLOBAL: Jika Region bukan "Acak", ciptakan *Micro-Location* ikonik yang SANGAT SPESIFIK dan HIDUP berdasarkan Region tersebut. (Misal: Jika "Eropa", detailkan jalanan bebatuan Paris. Jika "Amerika", detailkan kereta bawah tanah NYC. Jika "Asia Timur", detailkan gang neon Tokyo).
+1. LOKASI GLOBAL: Jika Region bukan "Acak", ciptakan *Micro-Location* ikonik yang SANGAT SPESIFIK dan HIDUP berdasarkan Region tersebut. 
 2. LOGIKA MUSIM & CUACA (CRITICAL): Sesuaikan pakaian (WARDROBE) dengan lokasi, cuaca, dan era secara LOGIS. DILARANG KERAS memakaikan winter coat/mantel tebal di pantai tropis atau daerah panas. DILARANG KERAS memakaikan kaos oblong tipis/baju renang di pegunungan bersalju atau cuaca winter.
-3. FASHION & AKSESORIS: Gali sub-kultur fashion era tersebut. Sebutkan warna, bahan (denim, wool, linen, dll), layer (jaket, syal), dan aksesoris (tas, kacamata, kalung) untuk setiap karakter.
+3. FASHION & AKSESORIS: Gali sub-kultur fashion era tersebut. Sebutkan warna, bahan, layer, dan aksesoris spesifik untuk setiap karakter.
 
 KEMBALIKAN HANYA FORMAT JSON BERIKUT (TANPA TEKS LAIN/MARKDOWN):
 {
@@ -635,8 +704,8 @@ KEMBALIKAN HANYA FORMAT JSON BERIKUT (TANPA TEKS LAIN/MARKDOWN):
     "META": { "STYLERNAME": "Nama style", "ASPECTRATIO": "9:16 atau 3:4 atau 1:1" },
     "CAMERA": { "MODEL": "...", "FOCALLNGTH": "...", "ANGLE": "...", "TYPE": "AMATEUR SNAPSHOT" },
     "SUBJECT": { "PRIMARY": "Deskripsi subjek", "GROUP_DYNAMICS_POSE": "Jelaskan pose dan interaksi (Inggris)", "GAZE": "Arah mata" },
-    "WARDROBE": { "THEME": "Tema pakaian (misal: 90s Harajuku Winter)", "OUTFITS": "Baju spesifik per orang (bahan, warna)", "HAIR_AND_ACCESSORIES": "Rambut spesifik & Aksesoris unik per orang", "APPEARANCE": "..." },
-    "ENVIRONMENT": { "LOCATION": "Deskripsikan Micro-Location spesifik & Ikonik", "TIME_OF_DAY": "...", "WEATHER_CONDITION": "...", "DETAILS": "Properti di sekitar yang membuat suasana hidup", "COMPOSITION_VIBE": "..." },
+    "WARDROBE": { "THEME": "Tema pakaian", "OUTFITS": "Baju spesifik per orang (bahan, warna)", "HAIR_AND_ACCESSORIES": "Rambut spesifik & Aksesoris unik per orang", "APPEARANCE": "..." },
+    "ENVIRONMENT": { "LOCATION": "Deskripsikan Micro-Location spesifik & Ikonik", "TIME_OF_DAY": "...", "WEATHER_CONDITION": "...", "DETAILS": "Properti di sekitar", "COMPOSITION_VIBE": "..." },
     "LIGHTING": { "SOURCE": "...", "DIRECTION": "...", "QUALITY": "..." },
     "RENDERING_EFFECTS": { "ENGINE": "PHOTOREALISTIC RAW UPLOAD, AMATEUR SMARTPHONE SHOT", "AESTHETIC_FLAWS": "...", "POSTPROCESSING": "UNEDITED CAMERA ROLL" },
     "NEGATIVE_PROMPT": "studio lighting, professional, CGI, dll."
@@ -659,7 +728,7 @@ KEMBALIKAN HANYA FORMAT JSON BERIKUT (TANPA TEKS LAIN/MARKDOWN):
                         contents: [{ parts: [{ text: metaPrompt }] }],
                         generationConfig: { 
                             response_mime_type: "application/json",
-                            temperature: 0.95 // Tinggi agar sangat kreatif
+                            temperature: 0.95 
                         }
                     })
                 });
@@ -689,18 +758,30 @@ KEMBALIKAN HANYA FORMAT JSON BERIKUT (TANPA TEKS LAIN/MARKDOWN):
                     parsedJSON.PHOTO_PROMPT.IMAGE_REFERENCE_INSTRUCTION = "ControlNet Pose / Depth enforcement: The AI MUST strictly replicate the exact anatomical posture, camera angle, perspective, and item placements as seen in the reference image the user provides.";
                 }
 
-                // TAMPILKAN HASIL
                 document.getElementById('jsonOutputPhoto').textContent = JSON.stringify(parsedJSON.PHOTO_PROMPT, null, 2);
                 document.getElementById('jsonOutputVideo').textContent = JSON.stringify(parsedJSON.VIDEO_PROMPT, null, 2);
 
             } catch (error) {
                 console.error(error);
-                document.getElementById('jsonOutputPhoto').textContent = "// ERROR API: \n" + error.message + "\n\n(Catatan: Jika Anda terkena limit kuota gratis, harap tunggu 60 detik sebelum menekan Generate lagi).";
+                document.getElementById('jsonOutputPhoto').textContent = "// ERROR API: \n" + error.message + "\n\n(Catatan: Limit kuota gratis tercapai. Harap tunggu 60 detik).";
                 document.getElementById('jsonOutputVideo').textContent = "// Gagal mendapatkan respon.";
             } finally {
-                btn.innerHTML = originalBtnHtml;
-                btn.disabled = false;
-                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                // SIKLUS COOLDOWN 5 DETIK AGAR TIDAK SPAM KLIK
+                let countdown = 5;
+                btn.innerHTML = `<i class="fa-solid fa-hourglass-half text-2xl"></i> TUNGGU ${countdown}s...`;
+                
+                const timer = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        btn.innerHTML = `<i class="fa-solid fa-hourglass-half text-2xl"></i> TUNGGU ${countdown}s...`;
+                    } else {
+                        clearInterval(timer);
+                        btn.innerHTML = originalBtnHtml;
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        btn.classList.add('hover:scale-105', 'hover:bg-blue-500');
+                    }
+                }, 1000);
             }
         }
 
